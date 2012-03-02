@@ -78,14 +78,17 @@ class Scheduler:
             rep += '%s\n' % `task`
         return rep
 
-    def AddTask(self, loopdelay, initdelay = 0, threaded=False):
+    def AddTask(self, loopdelay, initdelay = 0, threads=0):
         def act(action):
             def new(self):
                 return action(self)
-            task = Task(action, loopdelay, initdelay, threaded)
+            task = Task(action, loopdelay, initdelay, threads)
             self._tasks.append(task)
             return new
         return act
+
+    def AddTasks(self, tasks):
+        self._tasks.extend(Task(**task) for task in tasks)
 
     def StartAllTasks(self):
         for task in self._tasks:
@@ -95,34 +98,56 @@ class Scheduler:
         for task in self._tasks:
             print 'Stopping task', task
             task.stop()
-            task.join()
             print 'Stopped'
 
 if __name__ == '__main__':
 
+    # example "logger" function
     def timestamp(s):
         print '%.2f : %s' % (time.time(), s)
 
+    # example callable task action
+    class Action():
+        def __init__(self, name):
+            self.__name__       = name
+            self.call_counter   = 0
+
+        def __call__(self):
+            self.call_counter  += 1
+            print 'I am %s (%d)' % (self.__name__, self.call_counter)
+
     s = Scheduler()
-    # -----------------------------------------.
-    #          loopdelay   initdelay   threads |
-    # -----------------------------------------`
-    @s.AddTask(  1.3,          0              )
+    # ----------------------------------.
+    #                                   |
+    #  TASK PARAMS:                     |
+    #                                   |
+    #    loopdelay:   float, required   |
+    #    initdelay:   float, default=0  |
+    #    threads  :   int  , default=0  |
+    #                                   |
+    # ----------------------------------`
+    @s.AddTask(loopdelay=1.3)
     def task1():
         timestamp('task1')
 
-    @s.AddTask(  1.0,          3              )
+    @s.AddTask(loopdelay=1.0, initdelay=3)
     def task2():
         timestamp('task2')
         time.sleep(1.6)
         timestamp('task2 again')
 
-    @s.AddTask(  1.1,          0,         4   )
+    @s.AddTask(loopdelay=1.1, threads=4)
     def task3():
         timestamp('task3')
         time.sleep(4.4)
         timestamp('task3 again')
 
+    s.AddTasks({'action'    : Action('Agent%03d' % n)
+               ,'loopdelay' : 0.6
+               ,'initdelay' : 1.1
+               ,'threads'   : 0
+               }
+               for n in xrange(42))
     print s
     s.StartAllTasks()
     try:
