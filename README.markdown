@@ -10,6 +10,7 @@ Multisched is a lightweight function scheduler module for python
 
 ```python
 from multisched import Scheduler
+import time
 
 s = Scheduler()
 
@@ -54,8 +55,7 @@ s.AddTasks({'action'    : Action('Agent%03d' % n)
            ,'loopdelay' : 0.6
            ,'initdelay' : 1.1
            ,'threads'   : 0
-           }
-           for n in xrange(42))
+           } for n in xrange(42))
 print s
 s.StartAllTasks()
 try:
