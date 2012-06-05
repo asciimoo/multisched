@@ -2,11 +2,11 @@ from setuptools import setup, find_packages
 
 setup(
     name='multisched',
-    version='0.1.3',
+    version='0.1.4',
     author='Adam Tauber <asciimoo>',
     author_email='asciimoo@faszkorbacs.hu',
     packages=find_packages(),
-    scripts=['multisched.py'],
+    scripts=['multisched.py', 'README.markdown'],
     py_modules=['multisched' ],
     keywords='threaded scheduler',
     url='http://pypi.python.org/pypi/multisched/',
